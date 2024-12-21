@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Event Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            background-image: url('assets/background1.jpg'); /* Background image added */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .welcome-message {
+            font-size: 18px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .calendar-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 80%; /* Reduces the width of the calendar box */
+    max-width: 800px; /* You can adjust this value as needed */
+    margin: 0 auto; /* Centers the calendar horizontally */
+}
+
+.calendar {
+    width: 100%;
+}
+
+        
+
+        .add-event-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 12px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .add-event-btn:hover {
+            background-color: #45a049;
+        }
+
+        .event-details {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .rsvp-form {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .rsvp-form button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .rsvp-form button:hover {
+            background-color: #45a049;
+        }
+
+        .event-form {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .event-form input, .event-form textarea, .event-form label {
+            margin: 10px 0;
+            padding: 10px;
+            width: 300px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .event-form label {
+            text-align: left;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .event-form input[type="datetime-local"] {
+            width: 100%;
+        }
+
+        .event-form button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 200px;
+        }
+
+        .event-form button:hover {
+            background-color: #45a049;
+        }
+
+        .fc-toolbar {
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .logout-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .logout-btn:hover {
+            background-color: #e53935;
+        }
+
+        /* Event List */
+        .event-list {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-item h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .event-item p {
+            color: #666;
+            margin: 0;
+        }
+
+        .edit-btn, .delete-btn {
+            background-color: #ffa500;
+            color: white;
+            padding: 6px 12px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background-color: #ff8c00;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: #e53935;
+        }
+
+        .rsvp-status {
+            font-size: 14px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Calendar</h1>
+        <!-- Welcome message -->
+        <div class="welcome-message" id="welcome-message">
+            Welcome, <span id="username"></span>!
+        </div>
+
+        <!-- Logout Button -->
+        <button class="logout-btn" onclick="logout()">Logout</button>
+
+        <div class="calendar-container">
+            <div id="calendar" class="calendar"></div>
+        </div>
+
+        <!-- Button to Add Event -->
+        <button class="add-event-btn" onclick="toggleEventForm()">Add New Event</button>
+
+        <!-- Event Creation Form -->
+        <div class="event-form" id="event-form">
+            <div class="form-container">
+                <h2>Create a New Event</h2>
+                <input type="text" id="event-title" placeholder="Event Title" required />
+                <textarea id="event-description" placeholder="Event Description" required></textarea>
+                
+                <label for="event-datetime">Event Date and Time:</label>
+                <input type="datetime-local" id="event-datetime" required />
+                
+                <button onclick="submitEvent()">Create Event</button>
+            </div>
+        </div>
+
+        <!-- RSVP Section (will show when clicking on an event) -->
+        <div id="event-details" class="event-details" style="display: none;">
+            <h2 id="event-title-details">Event Title</h2>
+            <p id="event-description-details">Event Description</p>
+            <p id="event-date-details">Event Date: </p>
+
+            <div class="rsvp-form">
+                <button onclick="rsvp(true)">RSVP Yes</button>
+                <button onclick="rsvp(false)">RSVP No</button>
+            </div>
+        </div>
+
+        <!-- Event List -->
+        <div class="event-list" id="event-list-container">
+            <h2>List of Created Events</h2>
+            <!-- Events will be dynamically populated here -->
+        </div>
+    </div>
+
+    <!-- FullCalendar JS and Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.2.0/dist/fullcalendar.min.js"></script>
+
+    <script>
+        let events = [];
+
+        // Fetch the username from the JWT token and display it
+        const token = localStorage.getItem("token");
+        if (token) {
+            const decoded = JSON.parse(atob(token.split('.')[1])); // Decoding JWT token
+            const username = decoded.username || "User"; // Assuming username is in the token
+            document.getElementById('username').innerText = username;
+        }
+
+        $(document).ready(function() {
+            // Initialize the calendar
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                events: events,
+                editable: true,
+                droppable: true,
+                eventClick: function(event) {
+                    document.getElementById('event-title-details').innerText = event.title;
+                    document.getElementById('event-description-details').innerText = event.description;
+                    document.getElementById('event-date-details').innerText = 'Event Date: ' + event.start.format('MMMM Do YYYY, h:mm A');
+                    document.getElementById('event-details').style.display = 'block';
+                }
+            });
+
+            // Populate event list on page load
+            fetchEvents();
+        });
+
+        function fetchEvents() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                fetch('http://localhost:5000/api/events', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => response.json())
+                .then(eventsData => {
+                    eventsData.forEach(event => {
+                        $('#calendar').fullCalendar('renderEvent', {
+                            title: event.title,
+                            start: event.start,
+                            end: event.end
+                        });
+                    });
+                })
+                .catch(error => console.error('Error fetching events:', error));
+            }
+        }
+
+        function toggleEventForm() {
+            const form = document.getElementById('event-form');
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function submitEvent() {
+            const title = document.getElementById('event-title').value;
+            const description = document.getElementById('event-description').value;
+            const eventDateTime = document.getElementById('event-datetime').value;
+
+            if (title && description && eventDateTime) {
+                const newEvent = {
+                    title: title,
+                    start: eventDateTime,
+                    end: eventDateTime, // Assuming the event ends at the same time for now
+                    description: description,
+                    backgroundColor: '#4CAF50',
+                    borderColor: '#4CAF50',
+                    id: events.length + 1,
+                    rsvp: "Not Yet Responded" // Default RSVP status
+                };
+
+                // Add event to the array and re-render the calendar
+                events.push(newEvent);
+                $('#calendar').fullCalendar('renderEvent', newEvent, true); // This will add the event to the calendar
+
+                // Hide the form after submission
+                toggleEventForm();
+
+                // Clear form fields
+                document.getElementById('event-title').value = '';
+                document.getElementById('event-description').value = '';
+                document.getElementById('event-datetime').value = '';
+
+                // Update the event list
+                updateEventList();
+            } else {
+                alert('Please fill all fields');
+            }
+        }
+
+        function rsvp(isAttending) {
+            const message = isAttending ? 'You have RSVP’d Yes! We look forward to your presence.' : 'You have RSVP’d No. We regret you cannot attend.';
+            alert(message);
+
+            // Find the event and update RSVP status
+            const event = events.find(e => e.title === document.getElementById('event-title-details').innerText);
+            if (event) {
+                event.rsvp = isAttending ? 'Yes' : 'No';
+                updateEventList();
+            }
+        }
+
+        function updateEventList() {
+            const eventListContainer = document.getElementById('event-list-container');
+            eventListContainer.innerHTML = '<h2>List of Created Events</h2>';
+
+            events.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.classList.add('event-item');
+                eventItem.innerHTML = `
+                    <h3>${event.title}</h3>
+                    <p>${event.description}</p>
+                    <p>Date: ${moment(event.start).format('DD-MM-YYYY')} Time: ${moment(event.start).format('HH:mm')}</p>
+                    <p class="rsvp-status">RSVP: ${event.rsvp}</p>
+                    <button class="edit-btn" onclick="editEvent(${event.id})">Edit</button>
+                    <button class="delete-btn" onclick="deleteEvent(${event.id})">Delete</button>
+                `;
+                eventListContainer.appendChild(eventItem);
+            });
+        }
+
+        function editEvent(eventId) {
+            const event = events.find(event => event.id === eventId);
+            if (event) {
+                document.getElementById('event-title').value = event.title;
+                document.getElementById('event-description').value = event.description;
+                document.getElementById('event-datetime').value = event.start;
+                toggleEventForm();
+                // Remove the event from the calendar before updating
+                deleteEvent(eventId);
+            }
+        }
+
+        function deleteEvent(eventId) {
+            events = events.filter(event => event.id !== eventId);
+            $('#calendar').fullCalendar('removeEvents', eventId); // Remove from calendar
+            updateEventList(); // Update event list
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'auth.html';
+        }
+    </script>
+</body>
+</html>
