@@ -1,75 +1,82 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User'); // Ensure correct path to the User model
+const Event = require('../models/Event'); // Ensure 'Event.js' matches this casing
+const authMiddleware = require('../middlewares/authMiddleware'); // Middleware for authentication
 const router = express.Router();
 
-// Register a new user
-router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+// Create a new event
+router.post('/', authMiddleware, async (req, res) => {
+  const { name, description, date } = req.body;
 
-  // Check if all fields are provided
-  if (!username || !email || !password) {
+  if (!name || !description || !date) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email already in use' });
-    }
-
-    // Create a new user with hashed password
-    const newUser = new User({
-      username,
-      email,
-      password,
+    const event = new Event({
+      name,
+      description,
+      date,
+      createdBy: req.userId, // `req.userId` is set by auth middleware
     });
 
-    // Save the user to the database
-    await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
+    await event.save();
+    res.status(201).json({ message: 'Event created successfully', event });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Login a user
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// Fetch all events created by the logged-in user
+router.get('/', authMiddleware, async (req, res) => {
+  try {
+    const events = await Event.find({ createdBy: req.userId });
+    res.status(200).json(events);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
-  // Check if email and password are provided
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
+// Update an event by its ID
+router.put('/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { name, description, date } = req.body;
+
+  if (!name || !description || !date) {
+    return res.status(400).json({ error: 'All fields are required' });
   }
 
   try {
-    // Find user by email
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+    const event = await Event.findOneAndUpdate(
+      { _id: id, createdBy: req.userId }, // Ensure the event belongs to the logged-in user
+      { name, description, date },
+      { new: true, runValidators: true }
+    );
+
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found or not authorized' });
     }
 
-    // Compare the password with the hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+    res.status(200).json({ message: 'Event updated successfully', event });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Delete an event by its ID
+router.delete('/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const event = await Event.findOneAndDelete({ _id: id, createdBy: req.userId });
+
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found or not authorized' });
     }
 
-    // Create a JWT token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    // Send the token and user info in the response
-    res.status(200).json({
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-      },
-    });
+    res.status(200).json({ message: 'Event deleted successfully' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
