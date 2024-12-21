@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // Ensure 'User.js' matches this casing
+const User = require('../models/User'); // Ensure 'User.js' path is correct
 
 const authMiddleware = async (req, res, next) => {
   // Extract the token from the Authorization header
@@ -15,7 +15,7 @@ const authMiddleware = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Attach the userId to the request object
-    req.userId = decoded.userId;
+    req.userId = decoded.id;  // Assuming the token contains an 'id' field for the user
 
     // Optionally, fetch the user from the database (if needed for additional checks)
     const user = await User.findById(req.userId);
@@ -26,7 +26,7 @@ const authMiddleware = async (req, res, next) => {
     // Proceed to the next middleware or route handler
     next();
   } catch (err) {
-    console.error(err);
+    console.error('Authentication error:', err);
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 };
