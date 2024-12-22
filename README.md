@@ -11,6 +11,7 @@ This project is a comprehensive tool designed to simplify the process of creatin
 - User registration and login via JWT.
 - Event creation, editing, and viewing.
 - RSVP functionality for events.
+- Calender Integration
 
 **Deployment:**
 - Frontend deployed on **Netlify**.
