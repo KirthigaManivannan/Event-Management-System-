@@ -17,9 +17,7 @@ This project is a comprehensive tool designed to simplify the process of creatin
 - Frontend deployed on **Netlify**.
 - Backend deployed on **Render** with MongoDB for data storage.
 
-Here's a concise version of the steps you can add to your GitHub README:
 
----
 
 ## Run Locally
 
