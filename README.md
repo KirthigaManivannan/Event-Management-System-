@@ -3,7 +3,7 @@ This project is a comprehensive tool designed to simplify the process of creatin
 
 **Tools Used:**
 - **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Node.js, Express.js, MongoDB
+- **Backend**: Node.js, MongoDB
 - **Authentication**: JWT
 - **Deployment**: Netlify (Frontend), Render (Backend)
 
